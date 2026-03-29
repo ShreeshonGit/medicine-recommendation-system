@@ -1,7 +1,8 @@
-<div align="center">
-  <img src="https://capsule-render.vercel.app/render?type=waving&color=0066ff&height=250&section=header&text=PulmoCare%20AI&fontSize=90" alt="PulmoCare AI Banner" />
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:1976d2,50:42a5f5,100:1976d2&height=220&section=header&text=PulmoCare%20AI&fontSize=80&fontColor=FFFFFF&fontAlignY=38&desc=Intelligent%20Respiratory%20Decision%20Support&descAlignY=60&descColor=ffffff&descSize=20" width="100%"/>
+</p>
 
-  <h1>🩺 Intelligent Respiratory Decision Support</h1>
+<br />
   <p><i>A hybrid Clinical Decision Support System (CDSS) combining traditional SVM Machine Learning with Google Gemini 2.5 Flash for expert-level pulmonary analysis.</i></p>
 
   <p>
