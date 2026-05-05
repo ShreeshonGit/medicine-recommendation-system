@@ -40,7 +40,7 @@ export default function Home() {
               {serverStatus === 'loading' ? <Loader2 size={16} className="animate-spin" /> :
                serverStatus === 'online' ? <Wifi size={16} /> : <WifiOff size={16} />}
               System Status: {serverStatus.toUpperCase()}
-              {serverStatus === 'offline' && <span className="text-xs ml-2 opacity-70">(Restart server.py)</span>}
+              {serverStatus === 'offline' && <span className="text-xs ml-2 opacity-70"></span>}
             </div>
           </div>
 

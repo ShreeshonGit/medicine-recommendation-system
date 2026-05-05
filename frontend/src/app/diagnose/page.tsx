@@ -1,13 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, Loader2, User, ClipboardList, FileText, Zap, Activity, 
-  Stethoscope, Pill, Microscope, AlertTriangle, BookOpen, CheckCircle2
+  Stethoscope, Pill, Microscope, AlertTriangle, BookOpen, CheckCircle2,
+  Cpu
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+
+interface Model {
+  id: string;
+  name: string;
+  provider: string;
+}
 
 export default function Diagnose() {
   const [symptoms, setSymptoms] = useState('');
@@ -15,6 +22,26 @@ export default function Diagnose() {
   const [loading, setLoading] = useState(false);
   const [aiReport, setAiReport] = useState<string>('');
   const [error, setError] = useState('');
+  const [availableModels, setAvailableModels] = useState<Model[]>([]);
+  const [selectedModel, setSelectedModel] = useState('');
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/v1/models');
+        if (response.ok) {
+          const data = await response.json();
+          setAvailableModels(data);
+          if (data.length > 0) {
+            setSelectedModel(data[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch models", err);
+      }
+    };
+    fetchModels();
+  }, []);
 
   const handlePredict = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +55,11 @@ export default function Diagnose() {
       const response = await fetch('http://127.0.0.1:8000/api/v1/analyze-deep-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symptoms, age: Number(age) })
+        body: JSON.stringify({ 
+          symptoms, 
+          age: Number(age),
+          model_id: selectedModel 
+        })
       });
 
       if (!response.body) return;
@@ -49,6 +80,8 @@ export default function Diagnose() {
       setLoading(false);
     }
   };
+
+  const currentModelInfo = availableModels.find(m => m.id === selectedModel);
 
   // Custom Markdown Renderers for a "Beautiful" UI
   const MarkdownComponents = {
@@ -115,7 +148,7 @@ export default function Diagnose() {
         <h2 className="text-5xl font-black text-white mb-4 tracking-tighter uppercase italic">
           PulmoCare <span className="text-blue-500">Expert</span> Analysis
         </h2>
-        <p className="text-gray-500 text-xl font-medium">Precision clinical reasoning powered by Gemini 2.5 Flash</p>
+        <p className="text-gray-500 text-xl font-medium">Precision clinical reasoning powered by Hybrid Intelligence</p>
       </motion.div>
 
       <div className="space-y-12">
@@ -133,12 +166,38 @@ export default function Diagnose() {
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-6 items-end">
-              <div className="w-full sm:w-1/3">
-                <label className="block text-sm font-bold text-gray-500 mb-3 uppercase tracking-widest flex items-center gap-2"><User size={16} className="text-blue-500" /> Patient Age</label>
-                <input type="number" value={age} onChange={(e) => setAge(Number(e.target.value))} className="w-full bg-black/40 border border-white/10 rounded-2xl p-5 text-white text-xl font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/20 shadow-inner" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
+              <div>
+                <label className="block text-sm font-bold text-gray-500 mb-3 uppercase tracking-widest flex items-center gap-2">
+                  <User size={16} className="text-blue-500" /> Patient Age
+                </label>
+                <input 
+                  type="number" 
+                  value={age} 
+                  onChange={(e) => setAge(Number(e.target.value))} 
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-5 text-white text-xl font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/20 shadow-inner" 
+                />
               </div>
-              <button disabled={loading} className="w-full sm:flex-1 h-[72px] bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white rounded-3xl font-black text-xl uppercase tracking-wider flex items-center justify-center gap-4 shadow-[0_10px_30px_rgba(37,99,235,0.4)] transition-all disabled:opacity-50 hover:scale-[1.02] active:scale-95 group">
+
+              <div>
+                <label className="block text-sm font-bold text-gray-500 mb-3 uppercase tracking-widest flex items-center gap-2">
+                  <Cpu size={16} className="text-blue-500" /> Analysis Model
+                </label>
+                <select 
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-5 text-white text-lg font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/20 shadow-inner appearance-none cursor-pointer"
+                >
+                  {availableModels.map(model => (
+                    <option key={model.id} value={model.id} className="bg-gray-900 text-white">
+                      {model.name} ({model.provider})
+                    </option>
+                  ))}
+                  {availableModels.length === 0 && <option value="">No models available</option>}
+                </select>
+              </div>
+
+              <button disabled={loading || !selectedModel} className="h-[72px] bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white rounded-3xl font-black text-xl uppercase tracking-wider flex items-center justify-center gap-4 shadow-[0_10px_30px_rgba(37,99,235,0.4)] transition-all disabled:opacity-50 hover:scale-[1.02] active:scale-95 group">
                 {loading ? <Loader2 className="animate-spin" /> : <><Activity size={24} className="group-hover:rotate-12 transition-transform" /> Run Diagnostics</>}
               </button>
             </div>
@@ -161,7 +220,9 @@ export default function Diagnose() {
                       <h3 className="text-3xl font-black text-white tracking-tighter uppercase italic">Clinical Narrative</h3>
                       <div className="flex gap-3 mt-1">
                         <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-black tracking-widest uppercase">Validated</span>
-                        <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 font-black tracking-widest uppercase">Gemini 2.5 Flash</span>
+                        <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 font-black tracking-widest uppercase">
+                          {currentModelInfo ? `${currentModelInfo.name} (${currentModelInfo.provider})` : 'AI Analysis'}
+                        </span>
                       </div>
                   </div>
                 </div>

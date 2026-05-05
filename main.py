@@ -1,4 +1,5 @@
 import streamlit as st
+from server import app
 import requests
 import json
 import time
@@ -201,6 +202,7 @@ Severity Assessment:
 Recommended Treatment (with drug name + dosage + duration):
 
 Alternatives (if needed):
+
 
 When to Seek Immediate Care:
 
