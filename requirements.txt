@@ -120,5 +120,7 @@ anthropic
 streamlit
 google-generativeai
 joblib
-pandas
+pandas>=2.2.0
 scikit-learn
+setuptools
+wheel
